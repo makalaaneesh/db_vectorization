@@ -88,6 +88,9 @@ class ArithmeticOperationExecutor: public Executor {
             result_tuple->len = 1;
 
             Tuple* input_tuple = childExecutor->next();
+            if (input_tuple == NULL){
+                return input_tuple;
+            }
 //            input_tuple->print();
             result_tuple->integers[0] = input_tuple->integers[0] + input_tuple->integers[1];
             return result_tuple;
@@ -126,20 +129,24 @@ class SelectionExecutor: public Executor {
 int main(){
     Tuple* final_result;
     // SELECT a from table;
-    SequentialScanExecutor sse("sample_table");
-    size_t columns[] = {0};
-    SelectionExecutor se(columns, 1, &sse);
-    while (true){
-        final_result = se.next();
-        if (final_result == NULL) break;
-        final_result->print();
-    }
+//    SequentialScanExecutor sse("sample_table");
+//    size_t columns[] = {0};
+//    SelectionExecutor se(columns, 1, &sse);
+//    while (true){
+//        final_result = se.next();
+//        if (final_result == NULL) break;
+//        final_result->print();
+//    }
 
 
 
     // SELECT a+b from table;
-//    ArithmeticOperationExecutor aoe("+", 0, 1, &sse);
-//    final_result = aoe.next();
-//    final_result->print();
+    SequentialScanExecutor sse("sample_table");
+    ArithmeticOperationExecutor aoe("+", 0, 1, &sse);
+    while (true){
+        final_result = aoe.next();
+        if (final_result == NULL) break;
+        final_result->print();
+    }
 
 }
