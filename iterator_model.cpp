@@ -52,50 +52,14 @@ public:
             for(size_t i = 0; i < 2; i++){
                 iss >> sample_tuple->integers[i];
             }
-//            sample_tuple->print();
 
             return sample_tuple;
         } else{
             return NULL;
         }
-
-
-//        Tuple *sample_tuple = (struct Tuple*) malloc(sizeof(struct Tuple));
-//        sample_tuple->integers = (int *) malloc(sizeof(int) * 2);
-//        sample_tuple->integers[0] = 1; sample_tuple->integers[1] = 2;
-//        sample_tuple->len = 2;
-//        return sample_tuple;
     }
 };
 
-
-class ArithmeticOperationExecutor: public Executor {
-        public:
-        string op;
-        size_t column1index, column2index;
-        Executor* childExecutor;
-
-        ArithmeticOperationExecutor(string _op, size_t _column1index, size_t _column2index, Executor* _childExecutor){
-            op = _op;
-            column1index = _column1index;
-            column2index = _column2index;
-            childExecutor = _childExecutor;
-        }
-
-        struct Tuple* next(){
-            Tuple* result_tuple = (struct Tuple*) malloc(sizeof(struct Tuple));
-            result_tuple->integers = (int *) malloc(sizeof(int) * 1);
-            result_tuple->len = 1;
-
-            Tuple* input_tuple = childExecutor->next();
-            if (input_tuple == NULL){
-                return input_tuple;
-            }
-//            input_tuple->print();
-            result_tuple->integers[0] = input_tuple->integers[0] + input_tuple->integers[1];
-            return result_tuple;
-        }
-};
 
 class AggregationOperationExecutor: public Executor {
 public:
@@ -157,7 +121,6 @@ class SelectionExecutor: public Executor {
             if (input_tuple == NULL){
                 return input_tuple;
             }
-//            input_tuple->print();
             for(size_t i=0; i<numColumns; i++){
                 result_tuple->integers[i] = input_tuple->integers[columnIndices[i]];
             }
@@ -167,24 +130,6 @@ class SelectionExecutor: public Executor {
 
 int main(){
     Tuple* final_result;
-    // SELECT a from table;
-//    SequentialScanExecutor sse("sample_table");
-//    size_t columns[] = {0};
-//    SelectionExecutor se(columns, 1, &sse);
-//    while (true){
-//        final_result = se.next();
-//        if (final_result == NULL) break;
-//    }
-
-
-
-//    // SELECT a+b from table;
-//    SequentialScanExecutor sse("sample_table");
-//    ArithmeticOperationExecutor aoe("+", 0, 1, &sse);
-//    while (true){
-//        final_result = aoe.next();
-//        if (final_result == NULL) break;
-//    }
 
 //    // SELECT sum(a) from table;
     SequentialScanExecutor sse("sample_table");
