@@ -18,7 +18,7 @@ public:
         for(size_t i=0; i<len; i++){
             printf("%d,", integers[i]);
         }
-        printf("]");
+        printf("]\n");
     }
 };
 
@@ -97,6 +97,45 @@ class ArithmeticOperationExecutor: public Executor {
         }
 };
 
+class AggregationOperationExecutor: public Executor {
+public:
+    string op;
+    size_t columnindex;
+    Executor* childExecutor;
+    int aggValue;
+    bool computed;
+
+    AggregationOperationExecutor(string _op, size_t _columnindex, Executor* _childExecutor){
+        op = _op;
+        columnindex = _columnindex;
+        childExecutor = _childExecutor;
+        aggValue = 0;
+        computed = 0;
+    }
+
+    struct Tuple* next(){
+        if (computed){
+            return NULL;
+        }
+        Tuple* result_tuple = (struct Tuple*) malloc(sizeof(struct Tuple));
+        result_tuple->integers = (int *) malloc(sizeof(int) * 1);
+        result_tuple->len = 1;
+
+        while (true) {
+            Tuple* input_tuple = childExecutor->next();
+            if (input_tuple == NULL){
+                break;
+            }
+            aggValue += input_tuple->integers[columnindex];
+        }
+
+//            input_tuple->print();
+        result_tuple->integers[0] = aggValue;
+        computed = 1;
+        return result_tuple;
+    }
+};
+
 class SelectionExecutor: public Executor {
         public:
         size_t* columnIndices;
@@ -135,18 +174,26 @@ int main(){
 //    while (true){
 //        final_result = se.next();
 //        if (final_result == NULL) break;
-//        final_result->print();
 //    }
 
 
 
-    // SELECT a+b from table;
+//    // SELECT a+b from table;
+//    SequentialScanExecutor sse("sample_table");
+//    ArithmeticOperationExecutor aoe("+", 0, 1, &sse);
+//    while (true){
+//        final_result = aoe.next();
+//        if (final_result == NULL) break;
+//    }
+
+//    // SELECT sum(a) from table;
     SequentialScanExecutor sse("sample_table");
-    ArithmeticOperationExecutor aoe("+", 0, 1, &sse);
+    AggregationOperationExecutor aoe("+", 0, &sse);
     while (true){
         final_result = aoe.next();
         if (final_result == NULL) break;
         final_result->print();
     }
+
 
 }
