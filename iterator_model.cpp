@@ -159,16 +159,17 @@ class SelectionExecutor: public Executor {
 };
 
 int main(){
-    size_t len = 100000000;
-    int * table = (int *) malloc(sizeof(int) * len);
-    for (int i = 0; i < len; ++i) {
-        table[i] = i;
-    }
+//    size_t len = 100000000;
+//    int * table = (int *) malloc(sizeof(int) * len);
+//    for (int i = 0; i < len; ++i) {
+//        table[i] = i;
+//    }
 
     Tuple* final_result;
 
 //    // SELECT avg(a) from table;
-    SequentialScanMemoryExecutor sse(table, len);
+//    SequentialScanMemoryExecutor sse(table, len);
+    SequentialScanExecutor sse("sample_table");
     AggregationOperationExecutor aoe("+", 0, &sse);
     while (true){
         final_result = aoe.next();

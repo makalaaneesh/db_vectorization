@@ -156,7 +156,7 @@ class AggregationOperationExecutor: public Executor {
                 }
 //                free(input_tuple_vector);
             }
-            printf("len=%lu\n", len);
+//            printf("len=%lu\n", len);
             aggValue = aggValue/len;
 
             result_tuple->integers[0] = aggValue;
@@ -192,22 +192,23 @@ class AggregationOperationExecutor: public Executor {
 //                result_tuple->integers[i] = input_tuple->integers[columnIndices[i]];
 //            }
 //            return result_tuple;
-//        }
+//        }`
 //};
 
 int main(){
-    vectorized_length = 8;
-
-    size_t len = 100000000;
-    int * table = (int *) malloc(sizeof(int) * len);
-    for (int i = 0; i < len; ++i) {
-        table[i] = i;
-    }
+    vectorized_length = 512;
+//
+//    size_t len = 1000000*2;
+//    int * table = (int *) malloc(sizeof(int) * len);
+//    for (int i = 0; i < len; ++i) {
+//        table[i] = i;
+//    }
 
     Tuple** final_result;
 
 //    // SELECT sum(a) from table;
-    SequentialScanMemoryExecutor sse(table, len);
+//    SequentialScanMemoryExecutor sse(table, len);
+    SequentialScanExecutor sse("sample_table");
     AggregationOperationExecutor aoe("+", 0, &sse);
     while (true){
         final_result = aoe.next();
