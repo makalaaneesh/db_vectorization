@@ -31,11 +31,14 @@ class SequentialScanExecutor: public Executor  {
 public:
     string filename;
     ifstream fs;
+    Tuple *sample_tuple;
 
     SequentialScanExecutor(string _filename){
         filename = _filename;
         fs.open(filename);
-
+        sample_tuple = (struct Tuple*) malloc(sizeof(struct Tuple));
+        sample_tuple->len = 1;
+        sample_tuple->integers = (int *) malloc(sizeof(int) * 1);
     }
 
 //        https://stackoverflow.com/questions/14600489/reading-data-file-into-2d-array-c
@@ -45,9 +48,9 @@ public:
         if (fs){
 
             istringstream iss(line);
-            Tuple *sample_tuple = (struct Tuple*) malloc(sizeof(struct Tuple));
-            sample_tuple->len = 1;
-            sample_tuple->integers = (int *) malloc(sizeof(int) * 1);
+//            Tuple *sample_tuple = (struct Tuple*) malloc(sizeof(struct Tuple));
+//            sample_tuple->len = 1;
+//            sample_tuple->integers = (int *) malloc(sizeof(int) * 1);
 //            sample_tuple->print();
             for(size_t i = 0; i < 1; i++){
                 iss >> sample_tuple->integers[i];

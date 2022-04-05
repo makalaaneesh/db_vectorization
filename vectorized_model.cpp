@@ -33,16 +33,22 @@ class SequentialScanExecutor: public Executor  {
         public:
         string filename;
         ifstream fs;
+        Tuple **results_vector;
 
         SequentialScanExecutor(string _filename){
             filename = _filename;
             fs.open(filename);
-
+            results_vector = (struct Tuple **) malloc(sizeof(struct Tuple *) * vectorized_length);
+            for (int v = 0; v < vectorized_length; ++v) {
+                results_vector[v] = (struct Tuple*) malloc(sizeof(struct Tuple));
+                results_vector[v]->len = 1;
+                results_vector[v]->integers = (int *) malloc(sizeof(int) * 1);
+            }
         }
 
 //        https://stackoverflow.com/questions/14600489/reading-data-file-into-2d-array-c
         struct Tuple** next(){
-            Tuple ** results_vector = (struct Tuple **) malloc(sizeof(struct Tuple *) * vectorized_length);
+
             int v;
             // TODO: read all at once.
             for (v = 0; v < vectorized_length; ++v) {
@@ -50,13 +56,14 @@ class SequentialScanExecutor: public Executor  {
                 getline(fs, line);
                 if (fs){
                     istringstream iss(line);
-                    results_vector[v] = (struct Tuple*) malloc(sizeof(struct Tuple));
-                    results_vector[v]->len = 1;
-                    results_vector[v]->integers = (int *) malloc(sizeof(int) * 1);
+//                    results_vector[v] = (struct Tuple*) malloc(sizeof(struct Tuple));
+//                    results_vector[v]->len = 1;
+//                    results_vector[v]->integers = (int *) malloc(sizeof(int) * 1);
 //            sample_tuple->print();
-                    for(size_t i = 0; i < 1; i++){
-                        iss >> results_vector[v]->integers[i];
-                    }
+//                    for(size_t i = 0; i < 1; i++){
+//                        iss >> results_vector[v]->integers[i];
+//                    }
+                    iss >> results_vector[v]->integers[0];
                 } else{
                     break;
                 }
@@ -152,8 +159,7 @@ class AggregationOperationExecutor: public Executor {
                 if (input_tuple_vector == NULL){
                     break;
                 }
-//                for (int v = 0; v < vectorized_length; ++v) {
-//                }
+
                 aggVectorTemp = _mm256_set_epi32(input_tuple_vector[0]->integers[columnindex], input_tuple_vector[1]->integers[columnindex], input_tuple_vector[2]->integers[columnindex], input_tuple_vector[3]->integers[columnindex],
                                                  input_tuple_vector[4]->integers[columnindex], input_tuple_vector[5]->integers[columnindex], input_tuple_vector[6]->integers[columnindex], input_tuple_vector[7]->integers[columnindex]);
                 aggVector = _mm256_add_epi32(aggVector, aggVectorTemp);
