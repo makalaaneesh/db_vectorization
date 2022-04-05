@@ -1,6 +1,7 @@
 #include<iostream>
 #include <fstream>
 #include <sstream>
+#include <immintrin.h>
 
 using namespace std;
 // Dealing with only ints
@@ -43,6 +44,7 @@ class SequentialScanExecutor: public Executor  {
         struct Tuple** next(){
             Tuple ** results_vector = (struct Tuple **) malloc(sizeof(struct Tuple *) * vectorized_length);
             int v;
+            // TODO: read all at once.
             for (v = 0; v < vectorized_length; ++v) {
                 string line;
                 getline(fs, line);
@@ -140,6 +142,9 @@ class AggregationOperationExecutor: public Executor {
             Tuple* result_tuple = (struct Tuple*) malloc(sizeof(struct Tuple));
             result_tuple->integers = (int *) malloc(sizeof(int) * 1);
             result_tuple->len = 1;
+            __m256i aggVector = _mm256_setzero_si256();
+            __m256i aggVectorTemp;
+
             Tuple** input_tuple_vector;
             while (true) {
 
@@ -147,15 +152,33 @@ class AggregationOperationExecutor: public Executor {
                 if (input_tuple_vector == NULL){
                     break;
                 }
-                for (int v = 0; v < vectorized_length; ++v) {
-                    if (input_tuple_vector[v] == NULL) break;
-//                    input_tuple_vector[v]->print();
-                    aggValue += input_tuple_vector[v]->integers[columnindex];
-                    len++;
-//                    free(input_tuple_vector[v]);
-                }
+//                for (int v = 0; v < vectorized_length; ++v) {
+//                }
+                aggVectorTemp = _mm256_set_epi32(input_tuple_vector[0]->integers[columnindex], input_tuple_vector[1]->integers[columnindex], input_tuple_vector[2]->integers[columnindex], input_tuple_vector[3]->integers[columnindex],
+                                                 input_tuple_vector[4]->integers[columnindex], input_tuple_vector[5]->integers[columnindex], input_tuple_vector[6]->integers[columnindex], input_tuple_vector[7]->integers[columnindex]);
+                aggVector = _mm256_add_epi32(aggVector, aggVectorTemp);
+                len += 8;
+
+//                for (int v = 0; v < vectorized_length; ++v) {
+//                    if (input_tuple_vector[v] == NULL) break;
+////                    input_tuple_vector[v]->print();
+//                    aggValue += input_tuple_vector[v]->integers[columnindex];
+//                    len++;
+////                    free(input_tuple_vector[v]);
+//                }
 //                free(input_tuple_vector);
             }
+            __attribute__ ((aligned (32))) int output[vectorized_length];
+//            _mm256_store_epi32(output, aggVector);
+//            __m256i ones = _mm256_set1_epi32(1);
+//            __m256i mask = _mm256_cmpgt_epi32(aggVector, ones);
+//            _mm256_maskstore_epi32(output, mask, aggVector);
+            _mm256_store_si256((__m256i*)output, aggVector);
+            for (int v = 0; v < vectorized_length; ++v) {
+                printf("%d\t", output[v]);
+                aggValue += output[v];
+            }
+            printf("\n");
 //            printf("len=%lu\n", len);
             aggValue = aggValue/len;
 
@@ -196,7 +219,7 @@ class AggregationOperationExecutor: public Executor {
 //};
 
 int main(){
-    vectorized_length = 512;
+    vectorized_length = 8;
 //
 //    size_t len = 1000000*2;
 //    int * table = (int *) malloc(sizeof(int) * len);
