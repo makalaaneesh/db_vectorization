@@ -92,36 +92,43 @@ class SequentialScanExecutor: public Executor  {
         }
 };
 
-//class SequentialScanMemoryExecutor: public Executor  {
-//        public:
-//        string filename;
-//        int* table;
-//        size_t i;
-//        size_t len;
-//
-//        SequentialScanMemoryExecutor(int *_table, size_t _len){
-//            table = _table;
-//            len = _len;
-//            i = 0;
-//        }
-//
-//        struct Tuple** next(){
+class SequentialScanMemoryExecutor: public Executor  {
+        public:
+        string filename;
+        int* table;
+        size_t i;
+        size_t len;
+        Tuple ** results_vector;
+
+        SequentialScanMemoryExecutor(int *_table, size_t _len){
+            table = _table;
+            len = _len;
+            i = 0;
+            results_vector = (struct Tuple **) malloc(sizeof(struct Tuple *) * vectorized_length);
+            for (int v = 0; v < vectorized_length; ++v) {
+                results_vector[v] = (struct Tuple*) malloc(sizeof(struct Tuple));
+                results_vector[v]->len = 1;
+                results_vector[v]->integers = (int *) malloc(sizeof(int) * 1);
+            }
+        }
+
+        struct Tuple** next(){
 //            Tuple ** results_vector = (struct Tuple **) malloc(sizeof(struct Tuple *) * vectorized_length);
-//            if (i >=len){
-//                return NULL;
-//            }
-//            for (int v = 0; v < vectorized_length; ++v) {
+            if (i >=len){
+                return NULL;
+            }
+            for (int v = 0; v < vectorized_length; ++v) {
 //                results_vector[v] = (struct Tuple*) malloc(sizeof(struct Tuple));
 //                results_vector[v]->len = 2;
 //                results_vector[v]->integers = (int *) malloc(sizeof(int) * 2);
-//                results_vector[v]->integers[0] = table[i++];
+                results_vector[v]->integers[0] = table[i++];
 //                results_vector[v]->integers[1] = table[i++];
-//                if (i>=len) break;
-//            }
-//
-//            return results_vector;
-//        }
-//};
+                if (i>=len) break;
+            }
+
+            return results_vector;
+        }
+};
 
 
 class AggregationOperationExecutor: public Executor {
@@ -185,7 +192,7 @@ class AggregationOperationExecutor: public Executor {
                 aggValue += output[v];
             }
             printf("\n");
-//            printf("len=%lu\n", len);
+            printf("len=%lu\n", len);
             aggValue = aggValue/len;
 
             result_tuple->integers[0] = aggValue;
@@ -226,18 +233,18 @@ class AggregationOperationExecutor: public Executor {
 
 int main(){
     vectorized_length = 8;
-//
-//    size_t len = 1000000*2;
-//    int * table = (int *) malloc(sizeof(int) * len);
-//    for (int i = 0; i < len; ++i) {
-//        table[i] = i;
-//    }
+
+    size_t len = 10000000;
+    int * table = (int *) malloc(sizeof(int) * len);
+    for (int i = 0; i < len; ++i) {
+        table[i] = rand()%(100) + 1;
+    }
 
     Tuple** final_result;
 
 //    // SELECT sum(a) from table;
-//    SequentialScanMemoryExecutor sse(table, len);
-    SequentialScanExecutor sse("sample_table");
+    SequentialScanMemoryExecutor sse(table, len);
+//    SequentialScanExecutor sse("sample_table");
     AggregationOperationExecutor aoe("+", 0, &sse);
     while (true){
         final_result = aoe.next();

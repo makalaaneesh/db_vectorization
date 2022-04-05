@@ -63,32 +63,36 @@ public:
     }
 };
 
-//class SequentialScanMemoryExecutor: public Executor  {
-//public:
-//    string filename;
-//    int* table;
-//    size_t i;
-//    size_t len;
-//
-//    SequentialScanMemoryExecutor(int *_table, size_t _len){
-//        table = _table;
-//        len = _len;
-//        i = 0;
-//    }
-//
-//    struct Tuple* next(){
+class SequentialScanMemoryExecutor: public Executor  {
+public:
+    string filename;
+    int* table;
+    size_t i;
+    size_t len;
+    Tuple *sample_tuple;
+
+    SequentialScanMemoryExecutor(int *_table, size_t _len){
+        table = _table;
+        len = _len;
+        i = 0;
+        sample_tuple = (struct Tuple*) malloc(sizeof(struct Tuple));
+        sample_tuple->len = 1;
+        sample_tuple->integers = (int *) malloc(sizeof(int) * 1);
+    }
+
+    struct Tuple* next(){
 //        Tuple *sample_tuple = (struct Tuple*) malloc(sizeof(struct Tuple));
 //        sample_tuple->len = 2;
 //        sample_tuple->integers = (int *) malloc(sizeof(int) * 2);
-//        if (i >=len){
-//            return NULL;
-//        }
-//        sample_tuple->integers[0] = table[i++];
+        if (i >=len){
+            return NULL;
+        }
+        sample_tuple->integers[0] = table[i++];
 //        sample_tuple->integers[1] = table[i++];
-//
-//        return sample_tuple;
-//    }
-//};
+
+        return sample_tuple;
+    }
+};
 
 class AggregationOperationExecutor: public Executor {
 public:
@@ -162,17 +166,17 @@ class SelectionExecutor: public Executor {
 };
 
 int main(){
-//    size_t len = 100000000;
-//    int * table = (int *) malloc(sizeof(int) * len);
-//    for (int i = 0; i < len; ++i) {
-//        table[i] = i;
-//    }
+    size_t len = 10000000;
+    int * table = (int *) malloc(sizeof(int) * len);
+    for (int i = 0; i < len; ++i) {
+        table[i] = rand()%(100) + 1;
+    }
 
     Tuple* final_result;
 
 //    // SELECT avg(a) from table;
-//    SequentialScanMemoryExecutor sse(table, len);
-    SequentialScanExecutor sse("sample_table");
+    SequentialScanMemoryExecutor sse(table, len);
+//    SequentialScanExecutor sse("sample_table");
     AggregationOperationExecutor aoe("+", 0, &sse);
     while (true){
         final_result = aoe.next();
