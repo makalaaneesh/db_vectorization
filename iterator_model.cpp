@@ -1,6 +1,7 @@
 #include<iostream>
 #include <fstream>
 #include <sstream>
+#include <time.h>
 
 using namespace std;
 // Dealing with only ints
@@ -178,11 +179,18 @@ int main(){
     SequentialScanMemoryExecutor sse(table, len);
 //    SequentialScanExecutor sse("sample_table");
     AggregationOperationExecutor aoe("+", 0, &sse);
+    struct timespec before;
+    struct timespec after;
+    clock_gettime(CLOCK_MONOTONIC, &before);
     while (true){
         final_result = aoe.next();
         if (final_result == NULL) break;
         final_result->print();
     }
+    clock_gettime(CLOCK_MONOTONIC, &after);
+    double time = (double)(after.tv_sec - before.tv_sec) +
+                  (double)(after.tv_nsec - before.tv_nsec) / 1e9;
+    printf("took %f seconds\n", time);
 
 
 }

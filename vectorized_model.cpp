@@ -2,6 +2,7 @@
 #include <fstream>
 #include <sstream>
 #include <immintrin.h>
+#include <time.h>
 
 using namespace std;
 // Dealing with only ints
@@ -188,11 +189,11 @@ class AggregationOperationExecutor: public Executor {
 //            _mm256_maskstore_epi32(output, mask, aggVector);
             _mm256_store_si256((__m256i*)output, aggVector);
             for (int v = 0; v < vectorized_length; ++v) {
-                printf("%d\t", output[v]);
+//                printf("%d\t", output[v]);
                 aggValue += output[v];
             }
-            printf("\n");
-            printf("len=%lu\n", len);
+//            printf("\n");
+//            printf("len=%lu\n", len);
             aggValue = aggValue/len;
 
             result_tuple->integers[0] = aggValue;
@@ -246,11 +247,18 @@ int main(){
     SequentialScanMemoryExecutor sse(table, len);
 //    SequentialScanExecutor sse("sample_table");
     AggregationOperationExecutor aoe("+", 0, &sse);
+    struct timespec before;
+    struct timespec after;
+    clock_gettime(CLOCK_MONOTONIC, &before);
     while (true){
         final_result = aoe.next();
         if (final_result == NULL) break;
         final_result[0]->print();
     }
+    clock_gettime(CLOCK_MONOTONIC, &after);
+    double time = (double)(after.tv_sec - before.tv_sec) +
+                  (double)(after.tv_nsec - before.tv_nsec) / 1e9;
+    printf("took %f seconds\n", time);
 
 
 }
