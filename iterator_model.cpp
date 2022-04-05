@@ -46,10 +46,10 @@ public:
 
             istringstream iss(line);
             Tuple *sample_tuple = (struct Tuple*) malloc(sizeof(struct Tuple));
-            sample_tuple->len = 2;
-            sample_tuple->integers = (int *) malloc(sizeof(int) * 2);
+            sample_tuple->len = 1;
+            sample_tuple->integers = (int *) malloc(sizeof(int) * 1);
 //            sample_tuple->print();
-            for(size_t i = 0; i < 2; i++){
+            for(size_t i = 0; i < 1; i++){
                 iss >> sample_tuple->integers[i];
             }
 
@@ -60,32 +60,32 @@ public:
     }
 };
 
-class SequentialScanMemoryExecutor: public Executor  {
-public:
-    string filename;
-    int* table;
-    size_t i;
-    size_t len;
-
-    SequentialScanMemoryExecutor(int *_table, size_t _len){
-        table = _table;
-        len = _len;
-        i = 0;
-    }
-
-    struct Tuple* next(){
-        Tuple *sample_tuple = (struct Tuple*) malloc(sizeof(struct Tuple));
-        sample_tuple->len = 2;
-        sample_tuple->integers = (int *) malloc(sizeof(int) * 2);
-        if (i >=len){
-            return NULL;
-        }
-        sample_tuple->integers[0] = table[i++];
-        sample_tuple->integers[1] = table[i++];
-
-        return sample_tuple;
-    }
-};
+//class SequentialScanMemoryExecutor: public Executor  {
+//public:
+//    string filename;
+//    int* table;
+//    size_t i;
+//    size_t len;
+//
+//    SequentialScanMemoryExecutor(int *_table, size_t _len){
+//        table = _table;
+//        len = _len;
+//        i = 0;
+//    }
+//
+//    struct Tuple* next(){
+//        Tuple *sample_tuple = (struct Tuple*) malloc(sizeof(struct Tuple));
+//        sample_tuple->len = 2;
+//        sample_tuple->integers = (int *) malloc(sizeof(int) * 2);
+//        if (i >=len){
+//            return NULL;
+//        }
+//        sample_tuple->integers[0] = table[i++];
+//        sample_tuple->integers[1] = table[i++];
+//
+//        return sample_tuple;
+//    }
+//};
 
 class AggregationOperationExecutor: public Executor {
 public:

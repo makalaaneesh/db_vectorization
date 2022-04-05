@@ -49,10 +49,10 @@ class SequentialScanExecutor: public Executor  {
                 if (fs){
                     istringstream iss(line);
                     results_vector[v] = (struct Tuple*) malloc(sizeof(struct Tuple));
-                    results_vector[v]->len = 2;
-                    results_vector[v]->integers = (int *) malloc(sizeof(int) * 2);
+                    results_vector[v]->len = 1;
+                    results_vector[v]->integers = (int *) malloc(sizeof(int) * 1);
 //            sample_tuple->print();
-                    for(size_t i = 0; i < 2; i++){
+                    for(size_t i = 0; i < 1; i++){
                         iss >> results_vector[v]->integers[i];
                     }
                 } else{
@@ -83,36 +83,36 @@ class SequentialScanExecutor: public Executor  {
         }
 };
 
-class SequentialScanMemoryExecutor: public Executor  {
-        public:
-        string filename;
-        int* table;
-        size_t i;
-        size_t len;
-
-        SequentialScanMemoryExecutor(int *_table, size_t _len){
-            table = _table;
-            len = _len;
-            i = 0;
-        }
-
-        struct Tuple** next(){
-            Tuple ** results_vector = (struct Tuple **) malloc(sizeof(struct Tuple *) * vectorized_length);
-            if (i >=len){
-                return NULL;
-            }
-            for (int v = 0; v < vectorized_length; ++v) {
-                results_vector[v] = (struct Tuple*) malloc(sizeof(struct Tuple));
-                results_vector[v]->len = 2;
-                results_vector[v]->integers = (int *) malloc(sizeof(int) * 2);
-                results_vector[v]->integers[0] = table[i++];
-                results_vector[v]->integers[1] = table[i++];
-                if (i>=len) break;
-            }
-
-            return results_vector;
-        }
-};
+//class SequentialScanMemoryExecutor: public Executor  {
+//        public:
+//        string filename;
+//        int* table;
+//        size_t i;
+//        size_t len;
+//
+//        SequentialScanMemoryExecutor(int *_table, size_t _len){
+//            table = _table;
+//            len = _len;
+//            i = 0;
+//        }
+//
+//        struct Tuple** next(){
+//            Tuple ** results_vector = (struct Tuple **) malloc(sizeof(struct Tuple *) * vectorized_length);
+//            if (i >=len){
+//                return NULL;
+//            }
+//            for (int v = 0; v < vectorized_length; ++v) {
+//                results_vector[v] = (struct Tuple*) malloc(sizeof(struct Tuple));
+//                results_vector[v]->len = 2;
+//                results_vector[v]->integers = (int *) malloc(sizeof(int) * 2);
+//                results_vector[v]->integers[0] = table[i++];
+//                results_vector[v]->integers[1] = table[i++];
+//                if (i>=len) break;
+//            }
+//
+//            return results_vector;
+//        }
+//};
 
 
 class AggregationOperationExecutor: public Executor {
