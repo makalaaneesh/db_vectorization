@@ -159,6 +159,7 @@ class AggregationOperationExecutor: public Executor {
             result_tuple->len = 1;
             __m256i aggVector = _mm256_setzero_si256();
             __m256i aggVectorTemp;
+            __m256i aggVectorTemp2;
 
             Tuple** input_tuple_vector;
             while (true) {
@@ -170,6 +171,7 @@ class AggregationOperationExecutor: public Executor {
 
                 aggVectorTemp = _mm256_set_epi32(input_tuple_vector[0]->integers[columnindex], input_tuple_vector[1]->integers[columnindex], input_tuple_vector[2]->integers[columnindex], input_tuple_vector[3]->integers[columnindex],
                                                  input_tuple_vector[4]->integers[columnindex], input_tuple_vector[5]->integers[columnindex], input_tuple_vector[6]->integers[columnindex], input_tuple_vector[7]->integers[columnindex]);
+//                aggVectorTemp = _mm256_mullo_epi32(aggVectorTemp, aggVectorTemp);
                 aggVector = _mm256_add_epi32(aggVector, aggVectorTemp);
                 len += 8;
 
@@ -233,13 +235,16 @@ class AggregationOperationExecutor: public Executor {
 //};
 
 int main(){
+    srand(42);
     vectorized_length = 8;
 
-    size_t len = 10000000;
+    size_t len = 100000000;
     int * table = (int *) malloc(sizeof(int) * len);
     for (int i = 0; i < len; ++i) {
         table[i] = rand()%(100) + 1;
+//        printf("%d\t", table[i]);
     }
+//    printf("\n");
 
     Tuple** final_result;
 

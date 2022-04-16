@@ -127,6 +127,8 @@ public:
                 break;
             }
             aggValue += input_tuple->integers[columnindex];
+//            aggValue += (input_tuple->integers[columnindex] * input_tuple->integers[columnindex]);
+//            printf("input = %d, aggValue=%d\n", input_tuple->integers[columnindex], aggValue);
             len++;
         }
         aggValue = aggValue/len;
@@ -167,11 +169,14 @@ class SelectionExecutor: public Executor {
 };
 
 int main(){
-    size_t len = 10000000;
+    srand(42);
+    size_t len = 100000000;
     int * table = (int *) malloc(sizeof(int) * len);
     for (int i = 0; i < len; ++i) {
         table[i] = rand()%(100) + 1;
+//        printf("%d\t", table[i]);
     }
+//    printf("\n");
 
     Tuple* final_result;
 
