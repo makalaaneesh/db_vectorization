@@ -1,13 +1,7 @@
 #include<iostream>
-#include <fstream>
-#include <sstream>
 #include <time.h>
 
 using namespace std;
-// Dealing with only ints
-// try just select itself should be faster in vector format. less trips to disk
-// try a + b
-// try a == b
 
 class Tuple{
 public:
@@ -28,41 +22,6 @@ public:
     virtual struct Tuple* next() = 0;
 };
 
-class SequentialScanExecutor: public Executor  {
-public:
-    string filename;
-    ifstream fs;
-    Tuple *sample_tuple;
-
-    SequentialScanExecutor(string _filename){
-        filename = _filename;
-        fs.open(filename);
-        sample_tuple = (struct Tuple*) malloc(sizeof(struct Tuple));
-        sample_tuple->len = 1;
-        sample_tuple->integers = (int *) malloc(sizeof(int) * 1);
-    }
-
-//        https://stackoverflow.com/questions/14600489/reading-data-file-into-2d-array-c
-    struct Tuple* next(){
-        string line;
-        getline(fs, line);
-        if (fs){
-
-            istringstream iss(line);
-//            Tuple *sample_tuple = (struct Tuple*) malloc(sizeof(struct Tuple));
-//            sample_tuple->len = 1;
-//            sample_tuple->integers = (int *) malloc(sizeof(int) * 1);
-//            sample_tuple->print();
-            for(size_t i = 0; i < 1; i++){
-                iss >> sample_tuple->integers[i];
-            }
-
-            return sample_tuple;
-        } else{
-            return NULL;
-        }
-    }
-};
 
 class SequentialScanMemoryExecutor: public Executor  {
 public:
@@ -82,14 +41,10 @@ public:
     }
 
     struct Tuple* next(){
-//        Tuple *sample_tuple = (struct Tuple*) malloc(sizeof(struct Tuple));
-//        sample_tuple->len = 2;
-//        sample_tuple->integers = (int *) malloc(sizeof(int) * 2);
         if (i >=len){
             return NULL;
         }
         sample_tuple->integers[0] = table[i++];
-//        sample_tuple->integers[1] = table[i++];
 
         return sample_tuple;
     }
@@ -127,46 +82,16 @@ public:
                 break;
             }
             aggValue += input_tuple->integers[columnindex];
-//            aggValue += (input_tuple->integers[columnindex] * input_tuple->integers[columnindex]);
-//            printf("input = %d, aggValue=%d\n", input_tuple->integers[columnindex], aggValue);
             len++;
         }
         aggValue = aggValue/len;
 
-//            input_tuple->print();
         result_tuple->integers[0] = aggValue;
         computed = 1;
         return result_tuple;
     }
 };
 
-class SelectionExecutor: public Executor {
-        public:
-        size_t* columnIndices;
-        size_t numColumns;
-        Executor* childExecutor;
-
-        SelectionExecutor(size_t* _columnIndices, size_t _numColumns, Executor* _childExecutor){
-            columnIndices = _columnIndices;
-            numColumns = _numColumns;
-            childExecutor = _childExecutor;
-        }
-
-        struct Tuple* next(){
-            Tuple* result_tuple = (struct Tuple*) malloc(sizeof(struct Tuple));
-            result_tuple->integers = (int *) malloc(sizeof(int) * numColumns);
-            result_tuple->len = numColumns;
-
-            Tuple* input_tuple = childExecutor->next();
-            if (input_tuple == NULL){
-                return input_tuple;
-            }
-            for(size_t i=0; i<numColumns; i++){
-                result_tuple->integers[i] = input_tuple->integers[columnIndices[i]];
-            }
-            return result_tuple;
-        }
-};
 
 int main(){
     srand(42);
@@ -174,16 +99,14 @@ int main(){
     int * table = (int *) malloc(sizeof(int) * len);
     for (int i = 0; i < len; ++i) {
         table[i] = rand()%(100) + 1;
-//        printf("%d\t", table[i]);
     }
-//    printf("\n");
 
     Tuple* final_result;
 
-//    // SELECT avg(a) from table;
+
     SequentialScanMemoryExecutor sse(table, len);
-//    SequentialScanExecutor sse("sample_table");
     AggregationOperationExecutor aoe("+", 0, &sse);
+
     struct timespec before;
     struct timespec after;
     clock_gettime(CLOCK_MONOTONIC, &before);
